@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-pod
+spec:
+  serviceName: test-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-pod
+  template:
+    metadata:
+      labels:
+        app: test-pod
+    spec:
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        #runAsUser: 10002
+      containers:
+        - name: testing
+          image: busybox
+          command:
+            - sleep
+            - "3600"
+          volumeMounts:
+            - name: data
+              mountPath: /usr/sw/jail
+            - name: spool
+              mountPath: /usr/sw/adb
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app: test-pod
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 20Gi
+    - metadata:
+        name: spool
+        labels:
+          app: test-pod
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 20Gi
